@@ -35,14 +35,15 @@ def read_file(file_name):
 
             job = Job(machine_dict, job_id, op_number)
             jobs_dict.update({job.id: job})
-            machine = Machine(machine_id, duration, None, 0)
+            machine = Machine(machine_id, duration, None)
         else:
-            machine = Machine(machine_id, duration, pred, 0)
+            machine = Machine(machine_id, duration, pred)
 
         setw.add(job_id)
         job.machine_dict.update({operation: machine})
 
         pred = machine
+
 
 def generate_population(jobs, population_size):
     population = []
@@ -57,7 +58,6 @@ def generate_population(jobs, population_size):
     for i in range(population_size):
         population.append(generate_chromosome())
     return population
-
 
 
 if __name__ == '__main__':
