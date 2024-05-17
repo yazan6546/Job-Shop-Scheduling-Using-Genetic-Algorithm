@@ -1,5 +1,6 @@
 class Job:
 
+
     def __init__(self, machine_dict, id, op_number):
         self.machine_dict = machine_dict
         self.id = id
@@ -20,3 +21,12 @@ class Job:
             id_set.update(set(temp_list))
 
         return len(id_set)
+
+    @staticmethod
+    def decrement_working_machines(jobs_dict):
+        for job in jobs_dict.values():
+            machines = job.machine_dict.values()
+
+            for machine in machines:
+                if machine.is_busy:
+                    machine.decrement_remaining_time()

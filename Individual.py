@@ -1,5 +1,6 @@
 import random
-import Machine
+from Machine import *
+from Job import *
 
 
 class Individual:
@@ -72,34 +73,50 @@ class Individual:
                 fitness += 1
         return fitness
 
-    def handle_chromosome(self, jobs_dict, mapping, dictionary):
+    def handle_chromosome(self, jobs_dict, dictionary, list_machines, list_machines_busy, time):
 
         for gene in self.chromosome:
             if gene in dictionary:
-                dictionary[gene] = dictionary[gene] + 1
+                dictionary[gene] += 1
             else:
                 dictionary[gene] = 1
 
+            job = jobs_dict[gene]
             op_number = dictionary[gene]
             machine = jobs_dict[gene].machine_dict[op_number]
 
-            if (machine.status != Machine.Status.BUSY and
-                machine.predecessor is None or
-                machine.predecessor.status == Machine.Status.FINISHED):
+            if (not list_machines_busy[machine.id] and
+                    machine.predecessor is None or
+                    machine.predecessor.is_finished):
+                list_machines[machine.id - 1].append(job)
 
-                ############
+                list_machines_busy[machine.id] = True
+                machine.is_busy = True
+                machine.starting_time = time
 
+    def scheduling(self, jobs_dict):
 
-
-
-    def scheduling(self, jobs_dict, mapping):
+        number_machines = Job.get_number_of_machines(jobs_dict)
+        time = 0
+        list_machines = Individual.initialize_list(number_machines)
+        list_machines_busy = [False for _ in range(number_machines)]
 
         dict = {}  # to handle the number of occurrences
         while not Individual.is_finished(jobs_dict):
-            self.handle_chromosome(jobs_dict, mapping, dict)
+            self.handle_chromosome(jobs_dict, dict, list_machines, list_machines_busy, time)
+            Job.decrement_working_machines(jobs_dict)
+
+            time += 1
 
     @staticmethod
     def is_finished(jobs_dict):
         return all(all(machine.is_finished() for machine in job.machine_dict.values()) for job in jobs_dict.values())
 
+    @staticmethod
+    def initialize_list(number_machines):
 
+        list_main = []
+        for i in range(number_machines):
+            list_main.append([])
+
+        return list_main
