@@ -17,8 +17,9 @@ def main():
         print(f"chromosome {i + 1}: {chromosome.chromosome}")
 
     p1, p2 = select_parents(initial_population)
-    offspring1, offspring2 = partially_mapped_crossover(p1, p2, 3, 5)
-
+    offspring1, offspring2 = partially_mapped_crossover(p1, p2)
+    insertion_mutation(offspring1)
+    print(offspring1.chromosome)
 
 def read_file(file_name):
     file = pd.read_csv(file_name)
@@ -77,31 +78,18 @@ def extract_numbers(tuple_list):
     return result
 
 
-def partially_mapped_crossover(A, B, point1, point2):
+def partially_mapped_crossover(A, B):
     A = get_occurrence_tuples(A.chromosome)
     B = get_occurrence_tuples(B.chromosome)
-
-    # A = np.array(A)
-    # B = np.array(B)
-    # A = np.array(A, dtype=[('num', int), ('count', int)])
-    # B = np.array(B, dtype=[('num', int), ('count', int)])
-
+    print(A)
+    print(B)
+    point1 = random.randint(0,len(A) - 2)
+    point2 = random.randint(point1 + 1,len(A) - 1)
+    print(point1)
+    print(point2)
     def find_offspring(p1, p2):
-        # for i in range(point1, point2):
-        #     mapped_values[p1[i]] = p2[i]
-        # print(mapped_values)
-        # Initialize an empty NumPy array of shape (0), with the defined dtype
-        # dtype = [('num', int), ('count', int)]
-        #
-        # # Define the shape of the array
-        # shape = p1.shape
-        # # Initialize the NumPy array with (0, 0) tuples
-        # offspring = np.full(shape, (0, 0), dtype=dtype)
         offspring = [(0, 0) for _ in range(len(p1))]
         offspring[point1:point2] = p1[point1:point2]
-        # for i in p1[point1:point2]:
-        #     dict_occurrences[i] += 1
-        # print(dict_occurrences)
         for i in np.concatenate([np.arange(0, point1), np.arange(point2, len(p1))]):
             current = p2[i]
             while current in p1[point1:point2]:
@@ -113,6 +101,14 @@ def partially_mapped_crossover(A, B, point1, point2):
     offspring1 = find_offspring(A, B)
     offspring2 = find_offspring(B, A)
     return Individual(offspring1), Individual(offspring2)
+
+
+def insertion_mutation(individual):
+    index = random.randint(0,len(individual.chromosome) - 1)
+    gene = individual.chromosome.pop(index)
+    new_position = random.randint(0,len(individual.chromosome))
+    individual.chromosome.insert(new_position,gene)
+    return individual
 
 
 def find_tuple_index(lst, target_tuple):
