@@ -18,6 +18,7 @@ def main():
 
     p1, p2 = select_parents(initial_population)
     offspring1, offspring2 = partially_mapped_crossover(p1, p2)
+    #Mutation test
     insertion_mutation(offspring1)
     print(offspring1.chromosome)
 
