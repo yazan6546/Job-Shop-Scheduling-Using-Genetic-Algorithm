@@ -15,11 +15,15 @@ def main():
 
 
 def run_algorithm():
-    initial_population = generate_population(jobs_dict, 5)
+    initial_population = generate_population(jobs_dict, 100000)
     for i, chromosome in enumerate(initial_population):
         print(f"chromosome {i + 1}: {chromosome.chromosome}")
+        print(chromosome.calculate_makespan(jobs_dict))
 
-    for _ in range(100):
+    fittest = min(initial_population, key=lambda individual: individual.calculate_makespan(jobs_dict))
+    print(fittest.calculate_makespan(jobs_dict))
+
+    for _ in range(200):
 
         p1, p2 = select_parents(initial_population)
         offspring1, offspring2 = partially_mapped_crossover(p1, p2)
@@ -35,7 +39,7 @@ def run_algorithm():
 
     # choose the individual with the highest fitness
 
-    fittest = max(initial_population, key=lambda individual: individual.calculate_makespan(jobs_dict))
+    fittest = min(initial_population, key=lambda individual: individual.calculate_makespan(jobs_dict))
     print(fittest.calculate_makespan(jobs_dict))
 
 
@@ -163,17 +167,17 @@ def select_parents(population):
 
 
 def discard_individuals(population, offspring1, offspring2):
-    makespan = [(chromosome.calculate_makespan(jobs_dict)) for chromosome in population]
-    p1, p2 = random.choices(population, weights=makespan, k=2)
+   # makespan = [(chromosome.calculate_makespan(jobs_dict)) for chromosome in population]
+   # p1, p2 = random.choices(population, weights=makespan, k=2)
 
-    print(p1.chromosome)
-    print(p2.chromosome)
+   # print(p1.chromosome)
+   # print(p2.chromosome)
     # Ensure p1 and p2 are distinct, if not, reselect p2
-    while p1 == p2:
-        p2 = random.choices(population, weights=makespan, k=1)[0]
+   # while p1 == p2:
+  #      p2 = random.choices(population, weights=makespan, k=1)[0]
 
-    population.remove(p1)
-    population.remove(p2)
+    #population.remove(p1)
+   # population.remove(p2)
 
     population.append(offspring1)
     population.append(offspring2)
