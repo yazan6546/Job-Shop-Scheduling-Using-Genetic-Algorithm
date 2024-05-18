@@ -3,6 +3,7 @@ import numpy as np
 from Individual import *
 
 jobs_dict = {}
+setw = set()
 
 
 def main():
@@ -52,15 +53,17 @@ def read_file(file_name):
         machine_id = temp_list[2]
         duration = temp_list[3]
 
-        machine_dict_op = {}
-        machine_dict_id = {}
+        if job_id not in setw:
+            machine_dict_op = {}
+            machine_dict_id = {}
 
-        op_number = (file['job_id'] == job_id).sum()
+            op_number = (file['job_id'] == job_id).sum()
 
-        job = Job(machine_dict_op, machine_dict_id, job_id, op_number)
-        jobs_dict.update({job.id: job})
-        machine = Machine(machine_id, duration)
+            job = Job(machine_dict_op, machine_dict_id, job_id, op_number)
+            jobs_dict.update({job.id: job})
+            machine = Machine(machine_id, duration)
 
+        setw.add(job_id)
         job.machine_dict_op.update({operation: machine})
         job.machine_dict_id.update({machine_id: machine})
 
