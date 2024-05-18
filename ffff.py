@@ -3,7 +3,7 @@ import numpy as np
 from Job import Job
 import random
 from Machine import Machine
-import Individual
+from Individual import *
 
 jobs_dict = {}
 setw = set()
@@ -12,21 +12,18 @@ setw = set()
 def main():
     read_file('psc.csv')
 
-    print(Job.get_number_of_machines(jobs_dict))
-
     initial_population = generate_population(jobs_dict, 5)
     for i, chromosome in enumerate(initial_population):
-        print(f"chromosome {i + 1}: {chromosome}")
+        print(f"chromosome {i + 1}: {chromosome.chromosome}")
 
-    offspring1, offspring2 = partially_mapped_crossover(initial_population[0], initial_population[1], 3, 5)
-    print(offspring1)
-    print(offspring2)
-
+    p1, p2 = select_parents(initial_population)
+    offspring1, offspring2 = partially_mapped_crossover(p1, p2)
+    #Mutation test
+    insertion_mutation(offspring1)
+    print(offspring1.chromosome)
 
 def read_file(file_name):
     file = pd.read_csv(file_name)
-    print(file['machine'])
-
 
     for i in range(len(file)):
         temp_list = list(file.iloc[i])
@@ -72,6 +69,7 @@ def get_occurrence_tuples(array):
 
     return result
 
+
 def extract_numbers(tuple_list):
     result = []
 
@@ -81,50 +79,46 @@ def extract_numbers(tuple_list):
     return result
 
 
-
-
-
-def partially_mapped_crossover(A, B, point1, point2):
+def partially_mapped_crossover(A, B):
     A = get_occurrence_tuples(A.chromosome)
     B = get_occurrence_tuples(B.chromosome)
-    # A = np.array(A)
-    # B = np.array(B)
-    # A = np.array(A, dtype=[('num', int), ('count', int)])
-    # B = np.array(B, dtype=[('num', int), ('count', int)])
-
+    print(A)
+    print(B)
+    point1 = random.randint(0,len(A) - 2)
+    point2 = random.randint(point1 + 1,len(A) - 1)
+    print(point1)
+    print(point2)
     def find_offspring(p1, p2):
-        # for i in range(point1, point2):
-        #     mapped_values[p1[i]] = p2[i]
-        # print(mapped_values)
-        # Initialize an empty NumPy array of shape (0,) with the defined dtype
-        # dtype = [('num', int), ('count', int)]
-        #
-        # # Define the shape of the array
-        # shape = p1.shape
-        # # Initialize the NumPy array with (0, 0) tuples
-        # offspring = np.full(shape, (0, 0), dtype=dtype)
         offspring = [(0, 0) for _ in range(len(p1))]
         offspring[point1:point2] = p1[point1:point2]
-        # for i in p1[point1:point2]:
-        #     dict_occurances[i] += 1
-        # print(dict_occurances)
         for i in np.concatenate([np.arange(0, point1), np.arange(point2, len(p1))]):
             current = p2[i]
             while current in p1[point1:point2]:
-                current = p2[find_tuple_index(p1,current)]
+                current = p2[find_tuple_index(p1, current)]
             offspring[i] = current
         offspring = extract_numbers(offspring)
         return offspring
 
     offspring1 = find_offspring(A, B)
     offspring2 = find_offspring(B, A)
-    return offspring1, offspring2
+    return Individual(offspring1), Individual(offspring2)
+
+
+def insertion_mutation(individual):
+    index = random.randint(0,len(individual.chromosome) - 1)
+    gene = individual.chromosome.pop(index)
+    new_position = random.randint(0,len(individual.chromosome))
+    individual.chromosome.insert(new_position,gene)
+    return individual
+
 
 def find_tuple_index(lst, target_tuple):
     for index, tup in enumerate(lst):
         if tup == target_tuple:
             return index
     return None
+
+
 def generate_population(jobs, population_size):
     population = []
 
@@ -133,11 +127,17 @@ def generate_population(jobs, population_size):
         for job in jobs.values():
             initial_chromosome.extend([job.id] * job.op_number)
         random.shuffle(initial_chromosome)
-        return initial_chromosome
+        return Individual(initial_chromosome)
 
     for i in range(population_size):
         population.append(generate_chromosome())
     return population
+
+
+def select_parents(population):
+    fitness = [(chromosome.calculate_makespan(jobs_dict)) for chromosome in population]
+    p1, p2 = random.choices(population, weights=fitness, k=2)
+    return p1, p2
 
 
 if __name__ == '__main__':
