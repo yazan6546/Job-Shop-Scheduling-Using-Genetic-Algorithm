@@ -19,7 +19,7 @@ def main():
     offspring1, offspring2 = partially_mapped_crossover(initial_population[0], initial_population[1], 3, 5)
     print(offspring1.chromosome)
     print(offspring1.calculate_makespan(jobs_dict))
-
+    print("Hello")
 
 def read_file(file_name):
     file = pd.read_csv(file_name)
