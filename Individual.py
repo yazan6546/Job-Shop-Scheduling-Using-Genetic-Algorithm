@@ -60,23 +60,43 @@ class Individual:
         # generated chromosome for offspring
         return Individual(child_chromosome)
 
-    def cal_fitness(self):
-        """
-        Calculate fitness score, it is the number of
-        characters in string which differ from target
-        string.
-        """
-        global TARGET
-        fitness = 0
-        for gs, gt in zip(self.chromosome, TARGET):
-            if gs != gt:
-                fitness += 1
-        return fitness
+    def calculate_makespan(self, num_jobs, num_machines, job_dict):
+        # Initialize machine availability and job completion arrays
+        machine_availability = [0] * num_machines
+        job_completion = [0] * num_jobs
+
+        dictionary = {}
+
+        # Process each operation in the chromosome
+        for gene in self.chromosome:
+
+            if gene not in dictionary:
+                dictionary[gene] += 1
+            else:
+                dictionary[gene] = 1
+
+            job_id = gene
+            op_number = dictionary[gene]
+            machine = job_dict[job_id].machine_dict[op_number]
+
+            # Calculate start time for the current operation
+            start_time = max(machine_availability[machine.id], job_dict[job_id].finish_time)
+
+            # Calculate finish time for the current operation
+            finish_time = start_time + machine.duration
+
+            # Update machine availability and job completion times
+            machine_availability[machine.id] = finish_time
+            job_dict[job_id].finish_time = finish_time
+
+        # The makespan is the maximum job completion time
+        makespan = max(job_dict.values(), key=lambda job: job.finish_time)
+        return makespan
 
     def handle_chromosome(self, jobs_dict, dictionary, list_machines, dict_machines_busy, time):
 
         for gene in self.chromosome:
-            if gene in dictionary:
+            if gene not in dictionary:
                 dictionary[gene] += 1
             else:
                 dictionary[gene] = 1
@@ -89,31 +109,35 @@ class Individual:
                     machine.predecessor is None or
                     machine.predecessor.is_finished and
                     not machine.is_finished):
-
                 list_machines[machine.id].append(job)
                 dict_machines_busy[machine.id] = True
                 machine.is_busy = True
                 machine.starting_time = time
 
-    def scheduling(self, jobs_dict):
+            if machine.duration == 0:
+                dict_machines_busy[machine] = False
+                machine.is_finished = True
 
-        number_machines = Job.get_number_of_machines(jobs_dict)
+    def scheduling(self, jobs_dict, set_id):
+
+        number_machines = len(set_id)
         time = 0
         list_machines = Individual.initialize_list(number_machines)
         dict_machines_busy = {}
-        for machine_id in range(1,number_machines + 1):
-            dict_machines_busy[machine_id] = False
-        dict_machines_waiting_time = {}
-        for machine_id in range(1,number_machines + 1):
-            dict_machines_waiting_time[machine_id] = 0
-        dict = {}  # to handle the number of occurrences
-        while not Individual.is_finished(jobs_dict):
 
+        for machine_id in set_id:
+            dict_machines_busy[machine_id] = False
+
+        dict_machines_waiting_time = {}
+
+        for machine_id in set_id:
+            dict_machines_waiting_time[machine_id] = 0
+
+        dict = {}  # to handle the number of occurrences
+
+        while not Individual.is_finished(jobs_dict):  # terminate when all has finished
             Job.decrement_working_machines(jobs_dict)
             self.handle_chromosome(jobs_dict, dict, list_machines, dict_machines_busy, time)
-
-            map(lambda x : setattr)
-
             time += 1
 
     @staticmethod

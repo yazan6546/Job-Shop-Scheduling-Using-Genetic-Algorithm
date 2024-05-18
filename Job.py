@@ -5,6 +5,7 @@ class Job:
         self.machine_dict = machine_dict
         self.id = id
         self.op_number = op_number
+        self.finish_time = 0
 
     def calculate_total_duration(self):
         total_duration = 0

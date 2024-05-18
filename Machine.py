@@ -18,3 +18,10 @@ class Machine:
             self.is_finished = True
         else:
             self.remaining_time -= 1
+
+    @staticmethod
+    def increment_waiting_time(dict_machines_busy, dict_machines_waiting_time):
+
+        for id, busy in dict_machines_busy:
+            if not busy:
+                dict_machines_waiting_time[id] += 1

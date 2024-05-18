@@ -25,8 +25,7 @@ def main():
 
 def read_file(file_name):
     file = pd.read_csv(file_name)
-    print(file['machine'])
-
+    machine_ids = set(file['machine'])
 
     for i in range(len(file)):
         temp_list = list(file.iloc[i])
@@ -72,6 +71,7 @@ def get_occurrence_tuples(array):
 
     return result
 
+
 def extract_numbers(tuple_list):
     result = []
 
@@ -81,12 +81,10 @@ def extract_numbers(tuple_list):
     return result
 
 
-
-
-
 def partially_mapped_crossover(A, B, point1, point2):
     A = get_occurrence_tuples(A.chromosome)
     B = get_occurrence_tuples(B.chromosome)
+
     # A = np.array(A)
     # B = np.array(B)
     # A = np.array(A, dtype=[('num', int), ('count', int)])
@@ -111,7 +109,7 @@ def partially_mapped_crossover(A, B, point1, point2):
         for i in np.concatenate([np.arange(0, point1), np.arange(point2, len(p1))]):
             current = p2[i]
             while current in p1[point1:point2]:
-                current = p2[find_tuple_index(p1,current)]
+                current = p2[find_tuple_index(p1, current)]
             offspring[i] = current
         offspring = extract_numbers(offspring)
         return offspring
@@ -120,11 +118,14 @@ def partially_mapped_crossover(A, B, point1, point2):
     offspring2 = find_offspring(B, A)
     return offspring1, offspring2
 
+
 def find_tuple_index(lst, target_tuple):
     for index, tup in enumerate(lst):
         if tup == target_tuple:
             return index
     return None
+
+
 def generate_population(jobs, population_size):
     population = []
 
