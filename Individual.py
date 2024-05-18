@@ -60,8 +60,10 @@ class Individual:
         # generated chromosome for offspring
         return Individual(child_chromosome)
 
-    def calculate_makespan(self, set_id, job_dict):
+    def calculate_makespan(self, job_dict):
         # Initialize machine availability and job completion arrays
+
+        set_id = Job.get_set_of_machines(job_dict)
 
         machine_availability = {}
         for machine_id in set_id:
