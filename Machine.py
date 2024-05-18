@@ -7,7 +7,6 @@ class Machine:
         self.id = id
         self.duration = duration
         self.remaining_time = duration
-        self.waiting_time = 0
         self.predecessor = predecessor
         self.is_finished = False
         self.is_busy = False
@@ -15,7 +14,7 @@ class Machine:
 
     def decrement_remaining_time(self):
 
-        if self.remaining_time == 0:
+        if self.remaining_time == 1:
             self.is_finished = True
         else:
             self.remaining_time -= 1

@@ -73,7 +73,7 @@ class Individual:
                 fitness += 1
         return fitness
 
-    def handle_chromosome(self, jobs_dict, dictionary, list_machines, list_machines_busy, time):
+    def handle_chromosome(self, jobs_dict, dictionary, list_machines, dict_machines_busy, time):
 
         for gene in self.chromosome:
             if gene in dictionary:
@@ -85,12 +85,13 @@ class Individual:
             op_number = dictionary[gene]
             machine = jobs_dict[gene].machine_dict[op_number]
 
-            if (not list_machines_busy[machine.id] and
+            if (not dict_machines_busy[machine.id] and
                     machine.predecessor is None or
-                    machine.predecessor.is_finished):
-                list_machines[machine.id - 1].append(job)
+                    machine.predecessor.is_finished and
+                    not machine.is_finished):
 
-                list_machines_busy[machine.id] = True
+                list_machines[machine.id].append(job)
+                dict_machines_busy[machine.id] = True
                 machine.is_busy = True
                 machine.starting_time = time
 
@@ -99,12 +100,19 @@ class Individual:
         number_machines = Job.get_number_of_machines(jobs_dict)
         time = 0
         list_machines = Individual.initialize_list(number_machines)
-        list_machines_busy = [False for _ in range(number_machines)]
-
+        dict_machines_busy = {}
+        for machine_id in range(1,number_machines + 1):
+            dict_machines_busy[machine_id] = False
+        dict_machines_waiting_time = {}
+        for machine_id in range(1,number_machines + 1):
+            dict_machines_waiting_time[machine_id] = 0
         dict = {}  # to handle the number of occurrences
         while not Individual.is_finished(jobs_dict):
-            self.handle_chromosome(jobs_dict, dict, list_machines, list_machines_busy, time)
+
             Job.decrement_working_machines(jobs_dict)
+            self.handle_chromosome(jobs_dict, dict, list_machines, dict_machines_busy, time)
+
+            map(lambda x : setattr)
 
             time += 1
 

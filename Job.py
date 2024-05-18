@@ -23,7 +23,7 @@ class Job:
         return len(id_set)
 
     @staticmethod
-    def decrement_working_machines(jobs_dict):
+    def decrement_working_machines(jobs_dict, list_waiting):
         for job in jobs_dict.values():
             machines = job.machine_dict.values()
 
