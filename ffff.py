@@ -10,23 +10,22 @@ setw = set()
 
 
 def main():
-    read_file('psc.csv')
-
-    print(Job.get_number_of_machines(jobs_dict))
+    machine_id = read_file('psc.csv')
 
     initial_population = generate_population(jobs_dict, 5)
     for i, chromosome in enumerate(initial_population):
-        print(f"chromosome {i + 1}: {chromosome}")
+        print(f"chromosome {i + 1}: {chromosome.chromosome}")
 
     offspring1, offspring2 = partially_mapped_crossover(initial_population[0], initial_population[1], 3, 5)
-    print(offspring1)
-    print(offspring2)
+    print(offspring1.chromosome)
+    print(offspring1.calculate_makespan(machine_id, jobs_dict))
 
 
 def read_file(file_name):
     file = pd.read_csv(file_name)
     machine_ids = set(file['machine'])
 
+    print(machine_ids)
     for i in range(len(file)):
         temp_list = list(file.iloc[i])
 
@@ -50,6 +49,7 @@ def read_file(file_name):
         job.machine_dict.update({operation: machine})
 
         pred = machine
+    return machine_ids
 
 
 def get_occurrence_tuples(array):
@@ -116,7 +116,7 @@ def partially_mapped_crossover(A, B, point1, point2):
 
     offspring1 = find_offspring(A, B)
     offspring2 = find_offspring(B, A)
-    return offspring1, offspring2
+    return Individual.Individual(offspring1), Individual.Individual(offspring2)
 
 
 def find_tuple_index(lst, target_tuple):
@@ -134,7 +134,7 @@ def generate_population(jobs, population_size):
         for job in jobs.values():
             initial_chromosome.extend([job.id] * job.op_number)
         random.shuffle(initial_chromosome)
-        return initial_chromosome
+        return Individual.Individual(initial_chromosome)
 
     for i in range(population_size):
         population.append(generate_chromosome())

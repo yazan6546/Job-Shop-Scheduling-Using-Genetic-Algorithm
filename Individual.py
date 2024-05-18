@@ -60,17 +60,19 @@ class Individual:
         # generated chromosome for offspring
         return Individual(child_chromosome)
 
-    def calculate_makespan(self, num_jobs, num_machines, job_dict):
+    def calculate_makespan(self, set_id, job_dict):
         # Initialize machine availability and job completion arrays
-        machine_availability = [0] * num_machines
-        job_completion = [0] * num_jobs
+
+        machine_availability = {}
+        for machine_id in set_id:
+            machine_availability[machine_id] = 0
 
         dictionary = {}
 
         # Process each operation in the chromosome
         for gene in self.chromosome:
 
-            if gene not in dictionary:
+            if gene in dictionary:
                 dictionary[gene] += 1
             else:
                 dictionary[gene] = 1
@@ -80,10 +82,10 @@ class Individual:
             machine = job_dict[job_id].machine_dict[op_number]
 
             # Calculate start time for the current operation
-            start_time = max(machine_availability[machine.id], job_dict[job_id].finish_time)
+            job_dict[job_id].start_time = max(machine_availability[machine.id], job_dict[job_id].finish_time)
 
             # Calculate finish time for the current operation
-            finish_time = start_time + machine.duration
+            finish_time = job_dict[job_id].start_time + machine.duration
 
             # Update machine availability and job completion times
             machine_availability[machine.id] = finish_time
@@ -91,7 +93,7 @@ class Individual:
 
         # The makespan is the maximum job completion time
         makespan = max(job_dict.values(), key=lambda job: job.finish_time)
-        return makespan
+        return makespan.finish_time
 
     def handle_chromosome(self, jobs_dict, dictionary, list_machines, dict_machines_busy, time):
 
