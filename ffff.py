@@ -17,10 +17,13 @@ def main():
         print(f"chromosome {i + 1}: {chromosome.chromosome}")
 
     p1, p2 = select_parents(initial_population)
+
+    p1.create_gantt_chart(jobs_dict)
     offspring1, offspring2 = partially_mapped_crossover(p1, p2)
-    #Mutation test
+    # Mutation test
     insertion_mutation(offspring1)
     print(offspring1.chromosome)
+
 
 def read_file(file_name):
     file = pd.read_csv(file_name)
@@ -34,18 +37,20 @@ def read_file(file_name):
         duration = temp_list[3]
 
         if job_id not in setw:
-            machine_dict = {}
+            machine_dict_op = {}
+            machine_dict_id = {}
 
             op_number = (file['job_id'] == job_id).sum()
 
-            job = Job(machine_dict, job_id, op_number)
+            job = Job(machine_dict_op, machine_dict_id, job_id, op_number)
             jobs_dict.update({job.id: job})
             machine = Machine(machine_id, duration, None)
         else:
             machine = Machine(machine_id, duration, pred)
 
         setw.add(job_id)
-        job.machine_dict.update({operation: machine})
+        job.machine_dict_op.update({operation: machine})
+        job.machine_dict_id.update({machine_id:machine})
 
         pred = machine
 
@@ -84,10 +89,11 @@ def partially_mapped_crossover(A, B):
     B = get_occurrence_tuples(B.chromosome)
     print(A)
     print(B)
-    point1 = random.randint(0,len(A) - 2)
-    point2 = random.randint(point1 + 1,len(A) - 1)
+    point1 = random.randint(0, len(A) - 2)
+    point2 = random.randint(point1 + 1, len(A) - 1)
     print(point1)
     print(point2)
+
     def find_offspring(p1, p2):
         offspring = [(0, 0) for _ in range(len(p1))]
         offspring[point1:point2] = p1[point1:point2]
@@ -105,10 +111,10 @@ def partially_mapped_crossover(A, B):
 
 
 def insertion_mutation(individual):
-    index = random.randint(0,len(individual.chromosome) - 1)
+    index = random.randint(0, len(individual.chromosome) - 1)
     gene = individual.chromosome.pop(index)
-    new_position = random.randint(0,len(individual.chromosome))
-    individual.chromosome.insert(new_position,gene)
+    new_position = random.randint(0, len(individual.chromosome))
+    individual.chromosome.insert(new_position, gene)
     return individual
 
 

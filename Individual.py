@@ -64,7 +64,6 @@ class Individual:
         # Initialize machine availability and job completion arrays
 
         set_id = Job.get_set_of_machines(job_dict)
-
         machine_availability = {}
         for machine_id in set_id:
             machine_availability[machine_id] = 0
@@ -81,7 +80,7 @@ class Individual:
 
             job_id = gene
             op_number = dictionary[gene]
-            machine = job_dict[job_id].machine_dict[op_number]
+            machine = job_dict[job_id].machine_dict_op[op_number]
 
             # m2 = 3, m1 = 4
             # Calculate start time for the current operation
@@ -98,62 +97,25 @@ class Individual:
         makespan = max(job_dict.values(), key=lambda job: job.finish_time)
         return makespan.finish_time
 
-    def handle_chromosome(self, jobs_dict, dictionary, list_machines, dict_machines_busy, time):
+    def create_gantt_chart(self, jobs_dict):
+        set_machines = Job.get_set_of_machines(jobs_dict)
 
-        for gene in self.chromosome:
-            if gene not in dictionary:
-                dictionary[gene] += 1
-            else:
-                dictionary[gene] = 1
+        self.calculate_makespan(jobs_dict)
+        machine_gantt = Individual.initialize_dict(set_machines)
+        for job in jobs_dict.values():
+            machines = job.machine_dict_id
 
-            job = jobs_dict[gene]
-            op_number = dictionary[gene]
-            machine = jobs_dict[gene].machine_dict[op_number]
+            for machine_id in set_machines:
+                if machine_id in machines:
+                    machine_gantt[machine_id].append(job)
 
-            if (not dict_machines_busy[machine.id] and
-                    machine.predecessor is None or
-                    machine.predecessor.is_finished and
-                    not machine.is_finished):
-                list_machines[machine.id].append(job)
-                dict_machines_busy[machine.id] = True
-                machine.is_busy = True
-                machine.starting_time = time
-
-            if machine.duration == 0:
-                dict_machines_busy[machine] = False
-                machine.is_finished = True
-
-    def scheduling(self, jobs_dict, set_id):
-
-        number_machines = len(set_id)
-        time = 0
-        list_machines = Individual.initialize_list(number_machines)
-        dict_machines_busy = {}
-
-        for machine_id in set_id:
-            dict_machines_busy[machine_id] = False
-
-        dict_machines_waiting_time = {}
-
-        for machine_id in set_id:
-            dict_machines_waiting_time[machine_id] = 0
-
-        dict = {}  # to handle the number of occurrences
-
-        while not Individual.is_finished(jobs_dict):  # terminate when all has finished
-            Job.decrement_working_machines(jobs_dict)
-            self.handle_chromosome(jobs_dict, dict, list_machines, dict_machines_busy, time)
-            time += 1
+        print(machine_gantt)
 
     @staticmethod
-    def is_finished(jobs_dict):
-        return all(all(machine.is_finished() for machine in job.machine_dict.values()) for job in jobs_dict.values())
+    def initialize_dict(set_machines):
 
-    @staticmethod
-    def initialize_list(number_machines):
+        dictionary = {}
+        for i in set_machines:
+            dictionary[i] = []
 
-        list_main = []
-        for i in range(number_machines):
-            list_main.append([])
-
-        return list_main
+        return dictionary

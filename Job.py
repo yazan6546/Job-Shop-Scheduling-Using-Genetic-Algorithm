@@ -1,8 +1,9 @@
 class Job:
 
 
-    def __init__(self, machine_dict, id, op_number):
-        self.machine_dict = machine_dict
+    def __init__(self, machine_dict_op, machine_dict_id, id, op_number):
+        self.machine_dict_op = machine_dict_op
+        self.machine_dict_id = machine_dict_id
         self.id = id
         self.op_number = op_number
         self.finish_time = 0
@@ -18,7 +19,7 @@ class Job:
 
         id_set = set()
         for job in jobs_dict.values():
-            temp_list = [machine.id for machine in job.machine_dict.values()]
+            temp_list = [machine.id for machine in job.machine_dict_op.values()]
             id_set.update(set(temp_list))
 
         return id_set
@@ -26,7 +27,7 @@ class Job:
     @staticmethod
     def decrement_working_machines(jobs_dict, list_waiting):
         for job in jobs_dict.values():
-            machines = job.machine_dict.values()
+            machines = job.machine_dict_op.values()
 
             for machine in machines:
                 if machine.is_busy:
