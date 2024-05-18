@@ -11,18 +11,32 @@ setw = set()
 
 def main():
     read_file('psc.csv')
+    run_algorithm()
 
+
+def run_algorithm():
     initial_population = generate_population(jobs_dict, 5)
     for i, chromosome in enumerate(initial_population):
         print(f"chromosome {i + 1}: {chromosome.chromosome}")
 
-    p1, p2 = select_parents(initial_population)
+    for _ in range(100):
 
-    p1.create_gantt_chart(jobs_dict)
-    offspring1, offspring2 = partially_mapped_crossover(p1, p2)
-    # Mutation test
-    insertion_mutation(offspring1)
-    print(offspring1.chromosome)
+        p1, p2 = select_parents(initial_population)
+        offspring1, offspring2 = partially_mapped_crossover(p1, p2)
+        # Mutation test
+
+        if random.random() < 0.1:
+            insertion_mutation(offspring1)
+
+        if random.random() < 0.1:
+            insertion_mutation(offspring2)
+
+        discard_individuals(initial_population, offspring1, offspring2)
+
+    # choose the individual with the highest fitness
+
+    fittest = max(initial_population, key=lambda individual: individual.calculate_makespan(jobs_dict))
+    print(fittest.calculate_makespan(jobs_dict))
 
 
 def read_file(file_name):
@@ -50,7 +64,7 @@ def read_file(file_name):
 
         setw.add(job_id)
         job.machine_dict_op.update({operation: machine})
-        job.machine_dict_id.update({machine_id:machine})
+        job.machine_dict_id.update({machine_id: machine})
 
         pred = machine
 
@@ -87,14 +101,11 @@ def extract_numbers(tuple_list):
 def partially_mapped_crossover(A, B):
     A = get_occurrence_tuples(A.chromosome)
     B = get_occurrence_tuples(B.chromosome)
-    print(A)
-    print(B)
     point1 = random.randint(0, len(A) - 2)
     point2 = random.randint(point1 + 1, len(A) - 1)
-    print(point1)
-    print(point2)
 
     def find_offspring(p1, p2):
+
         offspring = [(0, 0) for _ in range(len(p1))]
         offspring[point1:point2] = p1[point1:point2]
         for i in np.concatenate([np.arange(0, point1), np.arange(point2, len(p1))]):
@@ -141,10 +152,31 @@ def generate_population(jobs, population_size):
 
 
 def select_parents(population):
-    fitness = [1/(chromosome.calculate_makespan(jobs_dict)) for chromosome in population]
-    print(fitness)
+    fitness = [1 / (chromosome.calculate_makespan(jobs_dict)) for chromosome in population]
     p1, p2 = random.choices(population, weights=fitness, k=2)
+
+    # Ensure p1 and p2 are distinct, if not, reselect p2
+    while p1 == p2:
+        p2 = random.choices(population, weights=fitness, k=1)[0]
+
     return p1, p2
+
+
+def discard_individuals(population, offspring1, offspring2):
+    makespan = [(chromosome.calculate_makespan(jobs_dict)) for chromosome in population]
+    p1, p2 = random.choices(population, weights=makespan, k=2)
+
+    print(p1.chromosome)
+    print(p2.chromosome)
+    # Ensure p1 and p2 are distinct, if not, reselect p2
+    while p1 == p2:
+        p2 = random.choices(population, weights=makespan, k=1)[0]
+
+    population.remove(p1)
+    population.remove(p2)
+
+    population.append(offspring1)
+    population.append(offspring2)
 
 
 if __name__ == '__main__':

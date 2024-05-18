@@ -19,6 +19,10 @@ class Individual:
         for machine_id in set_id:
             machine_availability[machine_id] = 0
 
+        for job in job_dict.values():
+            job.start_time = 0
+            job.finish_time = 0
+
         dictionary = {}
 
         # Process each operation in the chromosome
