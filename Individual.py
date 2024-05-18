@@ -83,6 +83,7 @@ class Individual:
             op_number = dictionary[gene]
             machine = job_dict[job_id].machine_dict[op_number]
 
+            # m2 = 3, m1 = 4
             # Calculate start time for the current operation
             job_dict[job_id].start_time = max(machine_availability[machine.id], job_dict[job_id].finish_time)
 

@@ -3,7 +3,7 @@ import numpy as np
 from Job import Job
 import random
 from Machine import Machine
-import Individual
+from Individual import *
 
 jobs_dict = {}
 setw = set()
@@ -16,10 +16,9 @@ def main():
     for i, chromosome in enumerate(initial_population):
         print(f"chromosome {i + 1}: {chromosome.chromosome}")
 
-    offspring1, offspring2 = partially_mapped_crossover(initial_population[0], initial_population[1], 3, 5)
-    print(offspring1.chromosome)
-    print(offspring1.calculate_makespan(jobs_dict))
-    print("Hello")
+    p1, p2 = select_parents(initial_population)
+    offspring1, offspring2 = partially_mapped_crossover(p1, p2, 3, 5)
+
 
 def read_file(file_name):
     file = pd.read_csv(file_name)
@@ -91,7 +90,7 @@ def partially_mapped_crossover(A, B, point1, point2):
         # for i in range(point1, point2):
         #     mapped_values[p1[i]] = p2[i]
         # print(mapped_values)
-        # Initialize an empty NumPy array of shape (0,) with the defined dtype
+        # Initialize an empty NumPy array of shape (0), with the defined dtype
         # dtype = [('num', int), ('count', int)]
         #
         # # Define the shape of the array
@@ -101,8 +100,8 @@ def partially_mapped_crossover(A, B, point1, point2):
         offspring = [(0, 0) for _ in range(len(p1))]
         offspring[point1:point2] = p1[point1:point2]
         # for i in p1[point1:point2]:
-        #     dict_occurances[i] += 1
-        # print(dict_occurances)
+        #     dict_occurrences[i] += 1
+        # print(dict_occurrences)
         for i in np.concatenate([np.arange(0, point1), np.arange(point2, len(p1))]):
             current = p2[i]
             while current in p1[point1:point2]:
@@ -113,7 +112,7 @@ def partially_mapped_crossover(A, B, point1, point2):
 
     offspring1 = find_offspring(A, B)
     offspring2 = find_offspring(B, A)
-    return Individual.Individual(offspring1), Individual.Individual(offspring2)
+    return Individual(offspring1), Individual(offspring2)
 
 
 def find_tuple_index(lst, target_tuple):
@@ -131,11 +130,17 @@ def generate_population(jobs, population_size):
         for job in jobs.values():
             initial_chromosome.extend([job.id] * job.op_number)
         random.shuffle(initial_chromosome)
-        return Individual.Individual(initial_chromosome)
+        return Individual(initial_chromosome)
 
     for i in range(population_size):
         population.append(generate_chromosome())
     return population
+
+
+def select_parents(population):
+    fitness = [(chromosome.calculate_makespan(jobs_dict)) for chromosome in population]
+    p1, p2 = random.choices(population, weights=fitness, k=2)
+    return p1, p2
 
 
 if __name__ == '__main__':
