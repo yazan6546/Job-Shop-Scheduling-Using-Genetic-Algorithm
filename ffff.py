@@ -141,7 +141,8 @@ def generate_population(jobs, population_size):
 
 
 def select_parents(population):
-    fitness = [(chromosome.calculate_makespan(jobs_dict)) for chromosome in population]
+    fitness = [1/(chromosome.calculate_makespan(jobs_dict)) for chromosome in population]
+    print(fitness)
     p1, p2 = random.choices(population, weights=fitness, k=2)
     return p1, p2
 

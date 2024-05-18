@@ -11,7 +11,6 @@ class Individual:
     def __init__(self, chromosome):
         self.chromosome = chromosome
 
-
     def calculate_makespan(self, job_dict):
         # Initialize machine availability and job completion arrays
 
@@ -37,6 +36,7 @@ class Individual:
             # m2 = 3, m1 = 4
             # Calculate start time for the current operation
             job_dict[job_id].start_time = max(machine_availability[machine.id], job_dict[job_id].finish_time)
+            machine.starting_time = job_dict[job_id].start_time
 
             # Calculate finish time for the current operation
             finish_time = job_dict[job_id].start_time + machine.duration
@@ -60,8 +60,6 @@ class Individual:
             for machine_id in set_machines:
                 if machine_id in machines:
                     machine_gantt[machine_id].append(job)
-
-        print(machine_gantt)
 
     @staticmethod
     def initialize_dict(set_machines):
