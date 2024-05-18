@@ -15,13 +15,13 @@ def main():
 
 
 def run_algorithm():
-    initial_population = generate_population(jobs_dict, 100000)
-    for i, chromosome in enumerate(initial_population):
-        print(f"chromosome {i + 1}: {chromosome.chromosome}")
-        print(chromosome.calculate_makespan(jobs_dict))
+    initial_population = generate_population(jobs_dict, 10)
+    #for i, chromosome in enumerate(initial_population):
+        #print(f"chromosome {i + 1}: {chromosome.chromosome}")
+        #print(chromosome.calculate_makespan(jobs_dict))
 
     fittest = min(initial_population, key=lambda individual: individual.calculate_makespan(jobs_dict))
-    print(fittest.calculate_makespan(jobs_dict))
+    #print(fittest.calculate_makespan(jobs_dict))
 
     for _ in range(200):
 
@@ -40,7 +40,9 @@ def run_algorithm():
     # choose the individual with the highest fitness
 
     fittest = min(initial_population, key=lambda individual: individual.calculate_makespan(jobs_dict))
-    print(fittest.calculate_makespan(jobs_dict))
+    #print(fittest.chromosome)
+    #print(fittest.calculate_makespan(jobs_dict))
+    Individual.create_gantt_chart(fittest,jobs_dict)
 
 
 def read_file(file_name):
