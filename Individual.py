@@ -6,13 +6,58 @@ import matplotlib.pyplot as plt
 
 class Individual:
     """
-    Class representing individual in population
+    Class representing an individual in a population for genetic algorithms.
+
+    Attributes:
+    ----------
+    chromosome : list
+        The chromosome representing the individual. It is a list
+        of genes that encode a potential solution to the problem.
+
+    Methods:
+    -------
+    initialize_dict(set_machines):
+        Initialize a dictionary with machine IDs as keys and empty lists as values
+        to assign jobs to machines.
+
+    create_gantt_chart(self, jobs_dict):
+        Create a Gantt chart for the given job assignments, showing the schedule
+        of jobs on machines.
+
+    calculate_makespan(self, job_dict):
+        Calculate the makespan of the given job assignments. The makespan is the
+        total time required to complete all jobs.
     """
 
     def __init__(self, chromosome):
+
+        """
+        Initialize an individual with a given chromosome.
+
+        Parameters:
+        ----------
+        chromosome : list
+            The chromosome representing the individual.
+        """
+
         self.chromosome = chromosome
 
     def calculate_makespan(self, job_dict):
+        """
+        Calculate the makespan of the job schedule.
+
+        Parameters:
+        ----------
+        job_dict : dict
+            A dictionary where keys are machine identifiers and values are lists
+            of jobs assigned to those machines.
+
+        Returns:
+        -------
+        int
+            The makespan, which is the total time required to complete all jobs.
+        """
+
         # Initialize machine availability and job completion arrays
 
         set_id = Job.get_set_of_machines(job_dict)
@@ -20,7 +65,7 @@ class Individual:
         for machine_id in set_id:
             machine_availability[machine_id] = 0
 
-        #Job Id -> Job object
+        # Job Id -> Job object
         for job in job_dict.values():
             job.start_time = 0
             job.finish_time = 0
@@ -37,7 +82,7 @@ class Individual:
 
             job_id = gene
             op_number = dictionary[gene]
-            #returns machine object for a specific operation of a particular job
+            # returns machine object for a specific operation of a particular job
             machine = job_dict[job_id].machine_dict_op[op_number]
 
             # m2 = 3, m1 = 4
@@ -57,8 +102,27 @@ class Individual:
         return makespan.finish_time
 
     def create_gantt_chart(self, jobs_dict):
+        """
+        Create a Gantt chart to visualize job assignments on machines.
+
+        Parameters:
+        ----------
+        jobs_dict : dict
+            A dictionary where keys are machine identifiers and values are lists
+            of jobs assigned to those machines.
+
+        Returns:
+        -------
+        None
+        """
+
+        # get a unique set of machines to easily traverse
         set_machines = Job.get_set_of_machines(jobs_dict)
+
+        # calls calculate_makespan to edit machine starting and finish times
         makespan = self.calculate_makespan(jobs_dict)
+
+        # initialize the fundamental set in which the jobs corresponding to each machine will be saved
         machine_gantt = Individual.initialize_dict(set_machines)
         for job in jobs_dict.values():
             machines = job.machine_dict_id
@@ -101,6 +165,20 @@ class Individual:
 
     @staticmethod
     def initialize_dict(set_machines):
+
+        """
+        Initialize a dictionary for job assignments.
+
+        Parameters:
+        ----------
+        set_machines : set
+            A set of machines to be used in the scheduling process.
+
+        Returns:
+        -------
+        dict
+            A dictionary with machine identifiers as keys and empty lists as values.
+        """
 
         dictionary = {}
         for i in set_machines:
