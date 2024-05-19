@@ -1,5 +1,8 @@
 import pandas as pd
 import numpy as np
+from Job import Job
+import random
+from Machine import Machine
 from Individual import *
 
 jobs_dict = {}
@@ -13,12 +16,12 @@ def main():
 
 def run_algorithm():
     initial_population = generate_population(jobs_dict, 10)
-    # for i, chromosome in enumerate(initial_population):
-    # print(f"chromosome {i + 1}: {chromosome.chromosome}")
-    # print(chromosome.calculate_makespan(jobs_dict))
+    #for i, chromosome in enumerate(initial_population):
+        #print(f"chromosome {i + 1}: {chromosome.chromosome}")
+        #print(chromosome.calculate_makespan(jobs_dict))
 
     fittest = min(initial_population, key=lambda individual: individual.calculate_makespan(jobs_dict))
-    # print(fittest.calculate_makespan(jobs_dict))
+    #print(fittest.calculate_makespan(jobs_dict))
 
     for _ in range(200):
 
@@ -37,9 +40,9 @@ def run_algorithm():
     # choose the individual with the highest fitness
 
     fittest = min(initial_population, key=lambda individual: individual.calculate_makespan(jobs_dict))
-    # print(fittest.chromosome)
-    # print(fittest.calculate_makespan(jobs_dict))
-    Individual.create_gantt_chart(fittest, jobs_dict)
+    #print(fittest.chromosome)
+    #print(fittest.calculate_makespan(jobs_dict))
+    Individual.create_gantt_chart(fittest,jobs_dict)
 
 
 def read_file(file_name):
@@ -61,11 +64,15 @@ def read_file(file_name):
 
             job = Job(machine_dict_op, machine_dict_id, job_id, op_number)
             jobs_dict.update({job.id: job})
-            machine = Machine(machine_id, duration)
+            machine = Machine(machine_id, duration, None)
+        else:
+            machine = Machine(machine_id, duration, pred)
 
         setw.add(job_id)
         job.machine_dict_op.update({operation: machine})
         job.machine_dict_id.update({machine_id: machine})
+
+        pred = machine
 
 
 def get_occurrence_tuples(array):
@@ -162,6 +169,17 @@ def select_parents(population):
 
 
 def discard_individuals(population, offspring1, offspring2):
+   # makespan = [(chromosome.calculate_makespan(jobs_dict)) for chromosome in population]
+   # p1, p2 = random.choices(population, weights=makespan, k=2)
+
+   # print(p1.chromosome)
+   # print(p2.chromosome)
+    # Ensure p1 and p2 are distinct, if not, reselect p2
+   # while p1 == p2:
+  #      p2 = random.choices(population, weights=makespan, k=1)[0]
+
+    #population.remove(p1)
+   # population.remove(p2)
 
     population.append(offspring1)
     population.append(offspring2)

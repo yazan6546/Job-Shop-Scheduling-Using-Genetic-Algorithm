@@ -20,7 +20,7 @@ class Individual:
         for machine_id in set_id:
             machine_availability[machine_id] = 0
 
-        # Job Id -> Job object
+        #Job Id -> Job object
         for job in job_dict.values():
             job.start_time = 0
             job.finish_time = 0
@@ -37,7 +37,7 @@ class Individual:
 
             job_id = gene
             op_number = dictionary[gene]
-            # returns machine object for a specific operation of a particular job
+            #returns machine object for a specific operation of a particular job
             machine = job_dict[job_id].machine_dict_op[op_number]
 
             # m2 = 3, m1 = 4
