@@ -1,4 +1,7 @@
+#Ahmad Qaimari-1210190
+#Yazan AboEloun-1210145
 import pandas as pd
+import random
 import numpy as np
 from Individual import *
 
@@ -15,24 +18,24 @@ def main():
 
 
 def run_algorithm():
-    initial_population = generate_population(jobs_dict, 1000)
+    initial_population = generate_population(jobs_dict, 10)
     # for i, chromosome in enumerate(initial_population):
     # print(f"chromosome {i + 1}: {chromosome.chromosome}")
     # print(chromosome.calculate_makespan(jobs_dict))
 
-    fittest = min(initial_population, key=lambda individual: individual.calculate_makespan(jobs_dict))
-    # print(fittest.calculate_makespan(jobs_dict))
-
+    fittest_initial = min(initial_population, key=lambda individual: individual.calculate_makespan(jobs_dict))
+    print(fittest_initial.calculate_makespan(jobs_dict))
+    Individual.create_gantt_chart(fittest_initial, jobs_dict)
     for _ in range(50):
 
         p1, p2 = select_parents(initial_population)
         offspring1, offspring2 = partially_mapped_crossover(p1, p2)
         # Mutation test
 
-        if random.random() < 0.01:
+        if random.random() < 0.1:
             insertion_mutation(offspring1)
 
-        if random.random() < 0.01:
+        if random.random() < 0.1:
             insertion_mutation(offspring2)
 
         initial_population.append(offspring1)
@@ -132,8 +135,7 @@ def get_occurrence_tuples(array):
     return result
 
 
-import random
-import numpy as np
+
 
 
 def partially_mapped_crossover(A, B):
@@ -188,7 +190,7 @@ def partially_mapped_crossover(A, B):
     return Individual(offspring1), Individual(offspring2)
 
 
-import random
+
 
 
 def insertion_mutation(individual):
