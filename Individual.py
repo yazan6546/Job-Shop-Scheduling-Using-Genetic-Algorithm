@@ -1,73 +1,74 @@
 import random
 from Machine import *
 from Job import *
+import matplotlib.pyplot as plt
 
 
 class Individual:
     """
-    Class representing individual in population
+    Class representing an individual in a population for genetic algorithms.
+
+    Attributes:
+    ----------
+    chromosome : list
+        The chromosome representing the individual. It is a list
+        of genes that encode a potential solution to the problem.
+
+    Methods:
+    -------
+    initialize_dict(set_machines):
+        Initialize a dictionary with machine IDs as keys and empty lists as values
+        to assign jobs to machines.
+
+    create_gantt_chart(self, jobs_dict):
+        Create a Gantt chart for the given job assignments, showing the schedule
+        of jobs on machines.
+
+    calculate_makespan(self, job_dict):
+        Calculate the makespan of the given job assignments. The makespan is the
+        total time required to complete all jobs.
     """
 
     def __init__(self, chromosome):
+
+        """
+        Initialize an individual with a given chromosome.
+
+        Parameters:
+        ----------
+        chromosome : list
+            The chromosome representing the individual.
+        """
+
         self.chromosome = chromosome
 
-    @classmethod
-    def mutated_genes(self):
-        """
-        create random genes for mutation
-        """
-        global GENES
-        gene = random.choice(GENES)
-        return gene
-
-    @classmethod
-    def create_gnome(self):
-        """
-        create chromosome or string of genes
-        """
-        global TARGET
-        gnome_len = len(TARGET)
-        return [self.mutated_genes() for _ in range(gnome_len)]
-
-    def mate(self, par2):
-        """
-        Perform mating and produce new offspring
-        """
-
-        # chromosome for offspring
-        child_chromosome = []
-        for gp1, gp2 in zip(self.chromosome, par2.chromosome):
-
-            # random probability
-            prob = random.random()
-
-            # if prob is less than 0.45, insert gene
-            # from parent 1
-            if prob < 0.45:
-                child_chromosome.append(gp1)
-
-                # if prob is between 0.45 and 0.90, insert
-            # gene from parent 2
-            elif prob < 0.90:
-                child_chromosome.append(gp2)
-
-                # otherwise insert random gene(mutate),
-            # for maintaining diversity
-            else:
-                child_chromosome.append(self.mutated_genes())
-
-                # create new Individual(offspring) using
-        # generated chromosome for offspring
-        return Individual(child_chromosome)
-
     def calculate_makespan(self, job_dict):
+        """
+        Calculate the makespan of the job schedule.
+
+        Parameters:
+        ----------
+        job_dict : dict
+            A dictionary where keys are machine identifiers and values are lists
+            of jobs assigned to those machines.
+
+        Returns:
+        -------
+        int
+            The makespan, which is the total time required to complete all jobs.
+        """
+
         # Initialize machine availability and job completion arrays
 
         set_id = Job.get_set_of_machines(job_dict)
-
         machine_availability = {}
         for machine_id in set_id:
             machine_availability[machine_id] = 0
+
+        # Job Id -> Job object
+        for job in job_dict.values():
+            job.start_time = 0
+            job.finish_time = 0
 
         dictionary = {}
 
@@ -81,11 +82,13 @@ class Individual:
 
             job_id = gene
             op_number = dictionary[gene]
-            machine = job_dict[job_id].machine_dict[op_number]
+            # returns machine object for a specific operation of a particular job
+            machine = job_dict[job_id].machine_dict_op[op_number]
 
             # m2 = 3, m1 = 4
             # Calculate start time for the current operation
             job_dict[job_id].start_time = max(machine_availability[machine.id], job_dict[job_id].finish_time)
+            machine.starting_time = job_dict[job_id].start_time
 
             # Calculate finish time for the current operation
             finish_time = job_dict[job_id].start_time + machine.duration
@@ -98,62 +101,87 @@ class Individual:
         makespan = max(job_dict.values(), key=lambda job: job.finish_time)
         return makespan.finish_time
 
-    def handle_chromosome(self, jobs_dict, dictionary, list_machines, dict_machines_busy, time):
+    def create_gantt_chart(self, jobs_dict):
+        """
+        Create a Gantt chart to visualize job assignments on machines.
 
-        for gene in self.chromosome:
-            if gene not in dictionary:
-                dictionary[gene] += 1
-            else:
-                dictionary[gene] = 1
+        Parameters:
+        ----------
+        jobs_dict : dict
+            A dictionary where keys are machine identifiers and values are lists
+            of jobs assigned to those machines.
 
-            job = jobs_dict[gene]
-            op_number = dictionary[gene]
-            machine = jobs_dict[gene].machine_dict[op_number]
+        Returns:
+        -------
+        None
+        """
 
-            if (not dict_machines_busy[machine.id] and
-                    machine.predecessor is None or
-                    machine.predecessor.is_finished and
-                    not machine.is_finished):
-                list_machines[machine.id].append(job)
-                dict_machines_busy[machine.id] = True
-                machine.is_busy = True
-                machine.starting_time = time
+        # get a unique set of machines to easily traverse
+        set_machines = Job.get_set_of_machines(jobs_dict)
 
-            if machine.duration == 0:
-                dict_machines_busy[machine] = False
-                machine.is_finished = True
+        # calls calculate_makespan to edit machine starting and finish times
+        makespan = self.calculate_makespan(jobs_dict)
 
-    def scheduling(self, jobs_dict, set_id):
-
-        number_machines = len(set_id)
-        time = 0
-        list_machines = Individual.initialize_list(number_machines)
-        dict_machines_busy = {}
-
-        for machine_id in set_id:
-            dict_machines_busy[machine_id] = False
-
-        dict_machines_waiting_time = {}
-
-        for machine_id in set_id:
-            dict_machines_waiting_time[machine_id] = 0
-
-        dict = {}  # to handle the number of occurrences
-
-        while not Individual.is_finished(jobs_dict):  # terminate when all has finished
-            Job.decrement_working_machines(jobs_dict)
-            self.handle_chromosome(jobs_dict, dict, list_machines, dict_machines_busy, time)
-            time += 1
+        # initialize the fundamental set in which the jobs corresponding to each machine will be saved
+        machine_gantt = Individual.initialize_dict(set_machines)
+        for job in jobs_dict.values():
+            machines = job.machine_dict_id
+            for machine_id in set_machines:
+                if machine_id in machines:
+                    machine_gantt[machine_id].append(job)
+        fig, ax = plt.subplots()
+        for index, machine_id in enumerate(machine_gantt):
+            ypos = index * 10
+            for job in machine_gantt[machine_id]:
+                op_start = job.machine_dict_id[machine_id].starting_time
+                op_finish = op_start + job.machine_dict_id[machine_id].duration
+                ax.broken_barh([(op_start, job.machine_dict_id[machine_id].duration)], (ypos, 8), facecolors='skyblue',
+                               edgecolors='black', linewidth=1)
+                ax.text(
+                    (op_start + op_finish) / 2,
+                    ypos + 4,
+                    f'J {job.id}',
+                    ha='center',
+                    va='center',
+                    transform=ax.transData,
+                    fontsize=10
+                )
+        num_ticks = 10
+        interval = makespan / num_ticks
+        interval = round(interval)
+        ax.set_ylim(0, len(set_machines) * 10)
+        ax.set_xlim(0, makespan)
+        x_ticks = list(range(0, int(makespan) + 1, interval))
+        x_ticks.pop()
+        x_ticks.append(int(makespan))
+        ax.set_xticks(x_ticks)
+        ax.set_yticks([i * 10 + 4 for i in range(len(set_machines))])
+        ax.set_xlabel('Time')
+        ytick_labels = [f'Machine {machine_id}' for machine_id in set_machines]
+        ax.set_yticklabels(ytick_labels)
+        ax.set_ylabel('Machines')
+        plt.title('Gantt Chart')
+        plt.show()
 
     @staticmethod
-    def is_finished(jobs_dict):
-        return all(all(machine.is_finished() for machine in job.machine_dict.values()) for job in jobs_dict.values())
+    def initialize_dict(set_machines):
 
-    @staticmethod
-    def initialize_list(number_machines):
+        """
+        Initialize a dictionary for job assignments.
 
-        list_main = []
-        for i in range(number_machines):
-            list_main.append([])
+        Parameters:
+        ----------
+        set_machines : set
+            A set of machines to be used in the scheduling process.
 
-        return list_main
+        Returns:
+        -------
+        dict
+            A dictionary with machine identifiers as keys and empty lists as values.
+        """
+
+        dictionary = {}
+        for i in set_machines:
+            dictionary[i] = []
+
+        return dictionary
