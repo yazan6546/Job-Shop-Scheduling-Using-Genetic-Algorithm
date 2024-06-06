@@ -248,3 +248,6 @@ output :
   <img src="Images/gantt_chart.png" alt="Description" width="800"/>
 </p>
 
+## Contributors
+- [Yazan AbuAloun](https://github.com/yazan6546)
+- [Ahmad Qaimari](https://github.com/ahmadqaimari)
