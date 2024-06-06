@@ -1,7 +1,6 @@
-import random
-from Machine import *
-from Job import *
 import matplotlib.pyplot as plt
+
+from Job import *
 
 
 class Individual:

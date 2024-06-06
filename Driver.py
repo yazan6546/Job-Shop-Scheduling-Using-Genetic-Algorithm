@@ -4,6 +4,7 @@ import pandas as pd
 import random
 import numpy as np
 from Individual import *
+from Machine import Machine
 
 # Dictionary to keep track of all Jobs in this problem
 jobs_dict = {}
