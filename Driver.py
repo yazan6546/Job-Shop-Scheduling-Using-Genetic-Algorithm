@@ -1,5 +1,5 @@
-#Ahmad Qaimari-1210190
-#Yazan AboEloun-1210145
+# Ahmad Qaimari-1210190
+# Yazan AboEloun-1210145
 import pandas as pd
 import random
 import numpy as np
@@ -135,9 +135,6 @@ def get_occurrence_tuples(array):
     return result
 
 
-
-
-
 def partially_mapped_crossover(A, B):
     """
     Perform partially mapped crossover (PMX) on two parent individuals to produce two offspring.
@@ -188,9 +185,6 @@ def partially_mapped_crossover(A, B):
 
     # Return the offspring as new Individual objects
     return Individual(offspring1), Individual(offspring2)
-
-
-
 
 
 def insertion_mutation(individual):
