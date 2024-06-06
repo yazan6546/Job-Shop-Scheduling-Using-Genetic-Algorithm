@@ -14,7 +14,7 @@ setw = set()
 
 
 def main():
-    read_file('psc.csv')
+    read_file('input.csv')
     run_algorithm()
 
 
